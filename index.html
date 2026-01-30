@@ -6,34 +6,29 @@
     <title>Coco Game Hub</title>
     <style>
         :root { --main-bg: #0f172a; --card-bg: #1e293b; --accent: #38bdf8; --success: #22c55e; }
-        body { margin: 0; background: var(--main-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        body { margin: 0; background: var(--main-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: manipulation; }
         
-        /* Screens Management */
         .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; position: absolute; }
         .active { display: flex !important; }
 
-        /* UI Components */
         .top-bar { position: fixed; top: 0; width: 100%; height: 65px; background: rgba(15, 23, 42, 0.9); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); z-index: 100; }
         .btn { padding: 12px 28px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
-        .btn:active { transform: scale(0.95); }
 
-        /* Game Selection */
-        .hub-container { display: flex; gap: 20px; margin-top: 20px; }
-        .game-card { background: var(--card-bg); padding: 25px; border-radius: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
-        .game-card:hover { border-color: var(--accent); background: #2d3e5a; }
-
-        /* Level Map */
         #map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 20px; overflow-y: auto; max-height: 60vh; background: #111827; border-radius: 15px; margin-top: 20px; }
         .level-box { width: 50px; height: 50px; background: #374151; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.5; }
         .unlocked { background: var(--success); opacity: 1; cursor: pointer; box-shadow: 0 0 10px var(--success); }
 
-        input { padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; width: 220px; margin-bottom: 10px; }
+        canvas { background: #1e293b; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: white; margin-bottom: 10px; }
+        
+        .game-card { background: var(--card-bg); padding: 25px; border-radius: 20px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.3s; margin-top: 20px; }
+        .game-card:hover { border-color: var(--accent); }
     </style>
 </head>
 <body>
 
     <div id="scr-login" class="screen active">
-        <h1 style="font-size: 3rem; margin-bottom: 10px;">COCO <span style="color:var(--accent)">HUB</span></h1>
+        <h1>COCO <span style="color:var(--accent)">HUB</span></h1>
         <p style="color: #94a3b8;">සෙල්ලම් කරන්න නම ඇතුළත් කරන්න</p>
         <input type="text" id="player-name" placeholder="ඔබේ නම...">
         <button class="btn" onclick="startApp()">LOGIN ONLINE</button>
@@ -43,43 +38,47 @@
         <div class="top-bar">
             <span>💰 Coins: <b id="h-coins">0</b></span>
             <span>🏆 Level: <b id="h-level">1</b></span>
-            <button class="btn" style="padding:5px 15px; background: #eab308;" onclick="navTo('scr-wallet')">Wallet</button>
+            <button class="btn" style="background: #eab308;" onclick="navTo('scr-wallet')">Wallet</button>
         </div>
         <h2>SELECT ADVENTURE</h2>
-        <div class="hub-container">
-            <div class="game-card" onclick="navTo('scr-map')">
-                <div style="font-size: 50px;">🎯</div>
-                <h3>Pin Challenge</h3>
-            </div>
-            <div class="game-card" onclick="alert('Coco Runner වැඩ කරමින් පවතිනවා (Coming Soon)')">
-                <div style="font-size: 50px;">🏃</div>
-                <h3>Coco Runner</h3>
-            </div>
+        <div class="game-card" onclick="navTo('scr-map')">
+            <div style="font-size: 50px;">🎯</div>
+            <h3>Pin Challenge</h3>
         </div>
         <button class="btn" style="margin-top:40px; background:#ef4444;" onclick="location.reload()">LOGOUT</button>
     </div>
 
     <div id="scr-map" class="screen">
-        <h2 style="margin-top: 80px;">Level Selection (1-100)</h2>
+        <h2 style="margin-top: 80px;">Level Map (1-100)</h2>
         <div id="map-grid"></div>
-        <button class="btn" onclick="navTo('scr-hub')" style="margin-top:20px; background:#475569;">Back to Menu</button>
+        <button class="btn" onclick="navTo('scr-hub')" style="margin-top:20px;">Back</button>
+    </div>
+
+    <div id="scr-game" class="screen">
+        <div class="top-bar">
+            <span id="g-lvl-display">Level: 1</span>
+            <span>Pins Left: <b id="pins-left">5</b></span>
+            <button class="btn" onclick="stopGame()" style="background:#ef4444;">Quit</button>
+        </div>
+        <canvas id="pinCanvas" width="320" height="400"></canvas>
+        <button class="btn" style="width: 80%; margin-top: 20px; background:#e67e22;" onclick="shootPin()">SHOOT PIN 🚀</button>
     </div>
 
     <div id="scr-wallet" class="screen">
         <h1>My Crypto Wallet</h1>
-        <div style="background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid #eab308;">
+        <div style="background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid #eab308; text-align: center;">
             <p>පවතින කොයින් ගණන: <b id="w-coins" style="color: #eab308; font-size: 1.5rem;">0</b></p>
-            <p style="font-size: 0.8rem; color: #94a3b8;">Minimum Withdrawal: 1000 Coco Coins</p>
-            <button class="btn" style="background: #444; cursor: not-allowed;" disabled>Wallet: Coming Soon</button>
+            <p>Minimum Withdrawal: 1000 Coins</p>
+            <button class="btn" style="background: #444;" disabled>Wallet: Coming Soon</button>
         </div>
         <button class="btn" onclick="navTo('scr-hub')" style="margin-top: 20px;">Back</button>
     </div>
 
     <script>
-        // Global Data
+        // --- දත්ත සහ මූලික සැකසුම් ---
         let stats = { coins: 0, unlockedLevel: 1, playerName: "" };
+        let canvas, ctx, angle = 0, pinsInWheel = [], pinsLeft = 5, isGameOver = false, currentLvl = 1;
 
-        // Navigation Logic
         function navTo(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(screenId);
@@ -90,25 +89,20 @@
             }
         }
 
-        // Login Process
         function startApp() {
-            const nameInput = document.getElementById('player-name').value;
-            if(nameInput.trim().length >= 3) {
-                stats.playerName = nameInput;
+            const name = document.getElementById('player-name').value;
+            if(name.trim().length >= 3) {
+                stats.playerName = name;
                 navTo('scr-hub');
-            } else {
-                alert("කරුණාකර අවම අකුරු 3ක නමක් ඇතුළත් කරන්න.");
-            }
+            } else { alert("කරුණාකර අවම අකුරු 3ක නමක් ඇතුළත් කරන්න."); }
         }
 
-        // UI Refresh
         function refreshUI() {
             document.getElementById('h-coins').innerText = stats.coins;
             document.getElementById('w-coins').innerText = stats.coins;
             document.getElementById('h-level').innerText = stats.unlockedLevel;
         }
 
-        // Level Map Generator
         function renderMap() {
             const grid = document.getElementById('map-grid');
             grid.innerHTML = "";
@@ -116,118 +110,109 @@
                 const node = document.createElement('div');
                 node.className = `level-box ${i <= stats.unlockedLevel ? 'unlocked' : ''}`;
                 node.innerText = i;
-                if(i <= stats.unlockedLevel) {
-                    node.onclick = () => alert("Level " + i + " සෙල්ලම් කිරීමට සූදානම්!");
-                }
+                if(i <= stats.unlockedLevel) node.onclick = () => initPinGame(i);
                 grid.appendChild(node);
             }
-        }   // --- PIN GAME VARIABLES ---
-let canvas, ctx;
-let angle = 0;
-let pinsInWheel = []; // රවුමේ වැදී ඇති පින්
-let pinsLeft = 5;
-let isGameOver = false;
-
-function startPinGame(level) {
-    navTo('scr-game'); // ගේම් ස්ක්‍රීන් එකට යන්න
-    canvas = document.getElementById('pinCanvas');
-    ctx = canvas.getContext('2d');
-    
-    // මූලික දත්ත සකසමු
-    pinsInWheel = [];
-    pinsLeft = 5; 
-    isGameOver = false;
-    currentLvl = level;
-    
-    animate();
-}
-
-function animate() {
-    if (isGameOver || document.getElementById('scr-game').classList.contains('active') === false) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 1. කැරකෙන මැද රවුම ඇඳීම
-    ctx.save();
-    ctx.translate(canvas.width / 2, 150);
-    ctx.rotate(angle);
-    
-    // ලොකු රවුම
-    ctx.beginPath();
-    ctx.arc(0, 0, 50, 0, Math.PI * 2);
-    ctx.fillStyle = "#f1c40f";
-    ctx.fill();
-    ctx.fillStyle = "black";
-    ctx.fillText(currentLvl, -5, 5); // ලෙවල් එක මැද පෙන්වයි
-
-    // රවුමට වැදී ඇති පින් ඇඳීම
-    pinsInWheel.forEach(pAngle => {
-        ctx.save();
-        ctx.rotate(pAngle);
-        ctx.beginPath();
-        ctx.moveTo(0, 50);
-        ctx.lineTo(0, 120);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "white";
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.arc(0, 120, 8, 0, Math.PI * 2);
-        ctx.fillStyle = "white";
-        ctx.fill();
-        ctx.restore();
-    });
-    ctx.restore();
-
-    // 2. විදීමට සූදානම් පින් එක ඇඳීම
-    if (pinsLeft > 0) {
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, 350);
-        ctx.lineTo(canvas.width / 2, 300);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, 350, 8, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    // වේගය ලෙවල් අනුව වැඩි වේ
-    angle += 0.02 + (currentLvl * 0.002);
-    requestAnimationFrame(animate);
-}
-
-function shootPin() {
-    if (isGameOver || pinsLeft <= 0) return;
-
-    // පින් එකක් රවුමට එකතු කිරීම (දැනට තියෙන angle එකට සාපේක්ෂව)
-    let hitAngle = -angle; 
-    
-    // 3. Collision Detection (එකක් උඩ එකක් වදිනවාද බැලීම)
-    let collision = pinsInWheel.some(pAngle => {
-        let diff = Math.abs(pAngle - hitAngle) % (Math.PI * 2);
-        return diff < 0.2 || diff > (Math.PI * 2 - 0.2);
-    });
-
-    if (collision) {
-        isGameOver = true;
-        alert("පරාදයි! පින් එකක් තව එකක වැදුණා.");
-        showPage('scr-map');
-    } else {
-        pinsInWheel.push(hitAngle);
-        pinsLeft--;
-        document.getElementById('pins-left').innerText = pinsLeft;
-
-        // 4. Level Win Logic
-        if (pinsLeft === 0) {
-            setTimeout(() => {
-                let reward = 10 + (currentLvl * 2);
-                stats.coins += reward;
-                if (currentLvl === stats.unlockedLevel) stats.unlockedLevel++;
-                alert("ලෙවල් එක ඉවරයි! කොයින් ලැබුණා: " + reward);
-                showPage('scr-map');
-            }, 200);
         }
-    }
-}
- </script>       
+
+        // --- PIN CHALLENGE GAME LOGIC ---
+        function initPinGame(level) {
+            navTo('scr-game');
+            canvas = document.getElementById('pinCanvas');
+            ctx = canvas.getContext('2d');
+            currentLvl = level;
+            pinsLeft = 5 + Math.floor(level / 5); // ලෙවල් වැඩි වෙද්දී අමාරු වෙන්න පින් වැඩි කරා
+            pinsInWheel = [];
+            isGameOver = false;
+            document.getElementById('g-lvl-display').innerText = "Level: " + level;
+            document.getElementById('pins-left').innerText = pinsLeft;
+            animate();
+        }
+
+        function stopGame() { isGameOver = true; navTo('scr-map'); }
+
+        function animate() {
+            if (isGameOver || !document.getElementById('scr-game').classList.contains('active')) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(canvas.width / 2, 150);
+            ctx.rotate(angle);
+            
+            // මැද කැරකෙන රවුම
+            ctx.beginPath();
+            ctx.arc(0, 0, 45, 0, Math.PI * 2);
+            ctx.fillStyle = "#f1c40f";
+            ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.font = "bold 20px Arial";
+            ctx.fillText(currentLvl, -10, 8);
+
+            // රවුමේ වැදී ඇති පින්
+            pinsInWheel.forEach(pAngle => {
+                ctx.save();
+                ctx.rotate(pAngle);
+                ctx.beginPath();
+                ctx.moveTo(0, 45);
+                ctx.lineTo(0, 110);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "white";
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 110, 6, 0, Math.PI * 2);
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.restore();
+            });
+            ctx.restore();
+
+            // පහළ විදීමට ඇති පින් එක
+            if (pinsLeft > 0) {
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, 340);
+                ctx.lineTo(canvas.width / 2, 280);
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, 340, 8, 0, Math.PI * 2);
+                ctx.fillStyle = "white";
+                ctx.fill();
+            }
+
+            angle += 0.02 + (currentLvl * 0.002); // වේගය වැඩි වීම
+            requestAnimationFrame(animate);
+        }
+
+        function shootPin() {
+            if (isGameOver || pinsLeft <= 0) return;
+            let hitAngle = -angle;
+            
+            let collision = pinsInWheel.some(pAngle => {
+                let diff = Math.abs(pAngle - hitAngle) % (Math.PI * 2);
+                return diff < 0.2 || diff > (Math.PI * 2 - 0.2);
+            });
+
+            if (collision) {
+                isGameOver = true;
+                alert("පරාදයි! පින් එකක් වැදුණා.");
+                navTo('scr-map');
+            } else {
+                pinsInWheel.push(hitAngle);
+                pinsLeft--;
+                document.getElementById('pins-left').innerText = pinsLeft;
+
+                if (pinsLeft === 0) {
+                    setTimeout(() => {
+                        let reward = 10 + (currentLvl * 2);
+                        stats.coins += reward;
+                        if (currentLvl === stats.unlockedLevel) stats.unlockedLevel++;
+                        alert("ලෙවල් එක ජයග්‍රහණය කළා! කොයින්: " + reward);
+                        navTo('scr-map');
+                    }, 200);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
