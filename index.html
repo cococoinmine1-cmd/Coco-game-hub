@@ -2,136 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coco Game Hub - Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coco Hub - Master</title>
     <style>
-        :root { --main-bg: #0b0e14; --accent: #38bdf8; --gold: #f1c40f; }
-        body { margin: 0; background: var(--main-bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        :root { --bg: #0b0e14; --accent: #38bdf8; --gold: #f1c40f; --danger: #ef4444; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: manipulation; }
 
-        /* Background Images - Placeholder icons applied to circles later */
-        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; position: absolute; background: radial-gradient(circle, #1e293b 0%, #0b0e14 100%); }
+        /* General Screen Setup */
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; position: absolute; text-align: center; }
         .active { display: flex !important; }
 
-        /* UI Styling */
-        .top-bar { position: fixed; top: 0; width: 100%; height: 70px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); z-index: 100; }
-        .btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; background: var(--accent); color: white; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
-        
-        /* Forms */
-        .input-group { display: flex; flex-direction: column; gap: 10px; width: 280px; }
-        input { padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #1e293b; color: white; }
+        /* Top Bar */
+        .top-bar { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); z-index: 100; }
 
-        /* Level Map Container */
-        #map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; padding: 20px; overflow-y: auto; max-height: 50vh; margin-top: 20px; background: rgba(255,255,255,0.05); border-radius: 20px; }
-        .level-box { width: 55px; height: 55px; background: #334155; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.4; }
+        /* Buttons & Inputs */
+        .btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; background: var(--accent); color: white; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-size: 16px; margin: 5px; }
+        input { padding: 15px; border-radius: 12px; border: 1px solid #334155; background: #1e293b; color: white; width: 80%; max-width: 300px; margin-bottom: 15px; font-size: 16px; }
+
+        /* Level Map */
+        .map-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; overflow-y: auto; max-height: 60vh; background: rgba(255,255,255,0.05); border-radius: 20px; margin: 20px; }
+        .lvl-box { width: 50px; height: 50px; background: #334155; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.4; }
         .unlocked { background: var(--accent); opacity: 1; cursor: pointer; box-shadow: 0 0 15px var(--accent); }
 
-        /* Game Elements */
-        #gameCanvas { background: url('https://www.transparenttextures.com/patterns/dark-matter.png'); border-radius: 20px; }
-        .result-screen { background: rgba(0,0,0,0.9); padding: 40px; border-radius: 30px; border: 2px solid var(--gold); text-align: center; }
+        /* Game UI */
+        canvas { background: transparent; border-radius: 20px; cursor: crosshair; }
+        .popup { background: rgba(15, 23, 42, 0.95); padding: 30px; border-radius: 30px; border: 2px solid var(--gold); width: 80%; max-width: 350px; }
+
+        /* Hub Cards */
+        .hub-card { width: 80%; max-width: 300px; background: #1e293b; padding: 20px; border-radius: 20px; margin: 10px; border: 2px solid transparent; transition: 0.3s; cursor: pointer; }
+        .hub-card:hover { border-color: var(--accent); transform: scale(1.02); }
     </style>
 </head>
 <body>
 
     <div id="scr-login" class="screen active">
-        <h1 style="color:var(--accent)">COCO HUB</h1>
-        <div class="input-group">
-            <input type="text" id="reg-name" placeholder="Full Name">
-            <input type="email" id="reg-email" placeholder="Email Address">
-            <input type="text" id="reg-tele" placeholder="Telegram @username">
-            <button class="btn" onclick="registerUser()">START EARNING</button>
-        </div>
+        <h1 style="color:var(--accent); font-size: 40px;">COCO <span style="color:white">HUB</span></h1>
+        <p style="color: #94a3b8;">Enter details to start</p>
+        <input type="text" id="reg-name" placeholder="Full Name">
+        <input type="email" id="reg-email" placeholder="Email Address">
+        <input type="text" id="reg-tele" placeholder="Telegram @username">
+        <button class="btn" onclick="registerUser()">LOGIN ONLINE</button>
     </div>
 
     <div id="scr-hub" class="screen">
         <div class="top-bar">
             <span>💰 <b id="h-coins">0</b></span>
-            <span id="h-user-tag">Player</span>
-            <button class="btn" style="background:var(--gold); color:black;" onclick="navTo('scr-wallet')">Wallet</button>
+            <span id="h-player-name">Player</span>
+            <button class="btn" style="background:var(--gold); color:black; padding: 5px 15px;" onclick="alert('Wallet Coming Soon!')">Wallet</button>
         </div>
-        <h2 style="margin-top:80px">CHOOSE GAME</h2>
-        <div style="display:flex; gap:20px">
-            <div class="btn" style="padding:40px; border-radius:20px" onclick="navTo('scr-map')">🎯 PIN CHALLENGE</div>
-            <div class="btn" style="padding:40px; border-radius:20px; background:#444">🏃 COCO RUNNER</div>
+        <h2 style="margin-top: 50px;">CHOOSE GAME</h2>
+        <div class="hub-card" onclick="navTo('scr-map')">
+            <img src="https://i.imgur.com/8YhR4qX.png" alt="Pin" style="width:60px;"> <h3>Pin Challenge</h3>
         </div>
+        <div class="hub-card" style="opacity: 0.6;" onclick="alert('Coming Soon!')">
+            <h3>Coco Runner</h3>
+            <p>Endless Dash</p>
+        </div>
+        <button class="btn" style="background:var(--danger); margin-top: 20px;" onclick="location.reload()">LOGOUT</button>
     </div>
 
     <div id="scr-map" class="screen">
         <div class="top-bar">
-            <button class="btn" onclick="navTo('scr-hub')">Main Menu</button>
-            <span>Level Map</span>
+            <button class="btn" style="padding: 5px 15px;" onclick="navTo('scr-hub')">Main Menu</button>
+            <span style="font-weight:bold;">LEVEL MAP</span>
         </div>
-        <div id="map-grid"></div>
+        <div class="map-container" id="map-grid"></div>
     </div>
 
     <div id="scr-game" class="screen">
         <div class="top-bar">
             <span>LVL: <b id="g-lvl">1</b></span>
-            <span>COINS: <b class="c-val">0</b></span>
-            <button class="btn" style="background:#ef4444" onclick="navTo('scr-map')">QUIT</button>
+            <span>PINS: <b id="pins-left">5</b></span>
+            <button class="btn" style="background:var(--danger); padding: 5px 15px;" onclick="navTo('scr-map')">QUIT</button>
         </div>
-        <canvas id="pinCanvas" width="350" height="450"></canvas>
-        <div id="game-controls" style="margin-top:20px">
-            <button class="btn" style="width:250px; height:60px; font-size:20px" onclick="shootPin()">SHOOT 🚀</button>
-        </div>
+        <p style="margin-top: 80px; color: var(--accent);">Touch the center wheel to shoot!</p>
+        <canvas id="pinCanvas" width="350" height="400" onclick="handleCanvasClick(event)"></canvas>
     </div>
 
-    <div id="scr-result" class="screen">
-        <div class="result-screen">
-            <h1 id="res-title" style="color:var(--gold)">LEVEL SUCCESS!</h1>
-            <p>You Earned: <span id="res-reward" style="font-size:24px; font-weight:bold">0</span> Coco Coins</p>
-            <p>Total Balance: <span class="c-val">0</span></p>
-            <div style="display:flex; gap:10px; justify-content:center">
-                <button class="btn" onclick="navTo('scr-map')">MAP</button>
-                <button id="next-lvl-btn" class="btn" style="background:var(--gold); color:black">NEXT LEVEL</button>
-            </div>
+    <div id="scr-msg" class="screen" style="background: rgba(0,0,0,0.85); z-index: 1000;">
+        <div class="popup">
+            <h1 id="msg-title" style="margin:0;">SUCCESS!</h1>
+            <p id="msg-body">You earned 10 Coins</p>
+            <div id="msg-btns" style="display:flex; flex-direction:column; gap:10px;">
+                </div>
         </div>
-    </div>
-
-    <div id="scr-wallet" class="screen">
-        <h2>CRYPTO WALLET</h2>
-        <div style="background:#1e293b; padding:30px; border-radius:20px; text-align:center">
-            <p>Available: <b class="c-val" style="color:var(--gold)">0</b> COCO</p>
-            <p style="color:gray">Telegram: <span id="w-tele"></span></p>
-            <button class="btn" disabled style="background:#333">Withdraw Coming Soon</button>
-        </div>
-        <button class="btn" style="margin-top:20px" onclick="navTo('scr-hub')">Back</button>
     </div>
 
     <script>
         let userData = { name: "", email: "", tele: "", coins: 0, unlocked: 1 };
         let canvas, ctx, angle = 0, pinsInWheel = [], pinsLeft = 5, isGameOver = false, currentLvl = 1;
 
-        // --- USER DATA & STORAGE ---
+        // --- AUTH & DATA ---
         function registerUser() {
-            userData.name = document.getElementById('reg-name').value;
-            userData.email = document.getElementById('reg-email').value;
-            userData.tele = document.getElementById('reg-tele').value;
-
-            if(userData.name && userData.email && userData.tele) {
-                localStorage.setItem('coco_user', JSON.stringify(userData));
-                initHub();
-            } else { alert("All fields are required!"); }
+            const n = document.getElementById('reg-name').value;
+            const e = document.getElementById('reg-email').value;
+            const t = document.getElementById('reg-tele').value;
+            if(n && e && t) {
+                userData = { name: n, email: e, tele: t, coins: 0, unlocked: 1 };
+                localStorage.setItem('coco_data', JSON.stringify(userData));
+                loadUserData();
+            } else { alert("Please fill all fields!"); }
         }
 
-        function initHub() {
-            let saved = localStorage.getItem('coco_user');
-            if(saved) userData = JSON.parse(saved);
-            document.getElementById('h-user-tag').innerText = userData.name;
-            document.getElementById('w-tele').innerText = userData.tele;
-            navTo('scr-hub');
+        function loadUserData() {
+            const saved = localStorage.getItem('coco_data');
+            if(saved) {
+                userData = JSON.parse(saved);
+                document.getElementById('h-player-name').innerText = userData.name;
+                document.getElementById('h-coins').innerText = userData.coins;
+                navTo('scr-hub');
+            }
         }
 
         function navTo(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             if(id === 'scr-map') renderMap();
-            updateAllCoins();
-        }
-
-        function updateAllCoins() {
-            document.querySelectorAll('.c-val').forEach(el => el.innerText = userData.coins);
-            document.getElementById('h-coins').innerText = userData.coins;
+            if(id === 'scr-hub') document.getElementById('h-coins').innerText = userData.coins;
         }
 
         function renderMap() {
@@ -139,101 +126,106 @@
             grid.innerHTML = "";
             for(let i=1; i<=100; i++) {
                 const node = document.createElement('div');
-                node.className = `level-box ${i <= userData.unlocked ? 'unlocked' : ''}`;
+                node.className = `lvl-box ${i <= userData.unlocked ? 'unlocked' : ''}`;
                 node.innerText = i;
-                if(i <= userData.unlocked) node.onclick = () => initPinGame(i);
+                if(i <= userData.unlocked) node.onclick = () => initGame(i);
                 grid.appendChild(node);
             }
         }
 
-        // --- PIN GAME LOGIC ---
-        function initPinGame(level) {
+        // --- PIN GAME ENGINE ---
+        function initGame(lvl) {
+            currentLvl = lvl;
+            pinsLeft = 5 + Math.floor(lvl / 3);
+            pinsInWheel = [];
+            isGameOver = false;
+            angle = 0;
+            document.getElementById('g-lvl').innerText = lvl;
+            document.getElementById('pins-left').innerText = pinsLeft;
             navTo('scr-game');
+            
             canvas = document.getElementById('pinCanvas');
             ctx = canvas.getContext('2d');
-            currentLvl = level;
-            isGameOver = false;
-            pinsInWheel = [];
-            
-            // Logic: As level goes up, Wheel gets bigger, Pins get shorter, Pin count increases
-            pinsLeft = 5 + Math.floor(level / 3);
-            document.getElementById('g-lvl').innerText = level;
-            document.getElementById('pins-left').innerText = pinsLeft;
             animate();
         }
 
         function animate() {
-            if (isGameOver || !document.getElementById('scr-game').classList.contains('active')) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(isGameOver || !document.getElementById('scr-game').classList.contains('active')) return;
+            ctx.clearRect(0,0,canvas.width, canvas.height);
 
-            let wheelRadius = 50 + (currentLvl * 0.5); // Wheel gets larger
-            let pinLength = 100 - (currentLvl * 0.4); // Pins get shorter
-            
+            let wheelRadius = 50 + (currentLvl * 0.4); 
+            let pinLen = 100 - (currentLvl * 0.3);
+
             ctx.save();
-            ctx.translate(canvas.width / 2, 180);
+            ctx.translate(canvas.width/2, 160);
             ctx.rotate(angle);
             
-            // Draw Wood Wheel
-            ctx.beginPath(); ctx.arc(0, 0, wheelRadius, 0, Math.PI * 2);
-            ctx.fillStyle = "#8b4513"; ctx.fill(); // Wood Brown
-            ctx.strokeStyle = "#5d2e0a"; ctx.lineWidth = 5; ctx.stroke();
+            // Wheel (Wood Texture Look)
+            ctx.beginPath(); ctx.arc(0,0, wheelRadius, 0, Math.PI*2);
+            ctx.fillStyle = "#8b4513"; ctx.fill();
+            ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 4; ctx.stroke();
             ctx.fillStyle = "white"; ctx.font = "bold 20px Arial";
             ctx.fillText(currentLvl, -10, 10);
 
-            // Draw Stuck Pins
-            pinsInWheel.forEach(pAngle => {
-                ctx.save(); ctx.rotate(pAngle);
-                ctx.beginPath(); ctx.moveTo(0, wheelRadius); ctx.lineTo(0, wheelRadius + pinLength);
-                ctx.lineWidth = 3; ctx.strokeStyle = "silver"; ctx.stroke();
+            // Pins
+            pinsInWheel.forEach(p => {
+                ctx.save(); ctx.rotate(p);
+                ctx.beginPath(); ctx.moveTo(0, wheelRadius); ctx.lineTo(0, wheelRadius + pinLen);
+                ctx.strokeStyle = "white"; ctx.lineWidth = 3; ctx.stroke();
                 ctx.restore();
             });
             ctx.restore();
 
-            // Incoming Pin
+            // Next Pin at bottom
             if(pinsLeft > 0) {
-                ctx.beginPath(); ctx.moveTo(canvas.width/2, 400); ctx.lineTo(canvas.width/2, 350);
-                ctx.strokeStyle = "silver"; ctx.lineWidth = 4; ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(canvas.width/2, 380); ctx.lineTo(canvas.width/2, 330);
+                ctx.strokeStyle = varColor('--accent'); ctx.lineWidth = 4; ctx.stroke();
             }
 
-            angle += 0.02 + (currentLvl * 0.001);
+            angle += 0.02 + (currentLvl * 0.0015);
             requestAnimationFrame(animate);
         }
 
-        function shootPin() {
-            if (isGameOver || pinsLeft <= 0) return;
-            let hitAngle = -angle;
-            let collision = pinsInWheel.some(pAngle => {
-                let diff = Math.abs(pAngle - hitAngle) % (Math.PI * 2);
-                return diff < 0.15;
-            });
+        function handleCanvasClick(e) { shootPin(); }
 
-            if (collision) {
-                isGameOver = true;
-                alert("GAME OVER! Pins Collided.");
-                navTo('scr-map');
+        function shootPin() {
+            if(isGameOver || pinsLeft <= 0) return;
+            let hitAngle = -angle;
+            let collision = pinsInWheel.some(p => Math.abs(p - hitAngle) % (Math.PI*2) < 0.15);
+
+            if(collision) {
+                showPopup("GAME OVER", "You hit a pin!", false);
             } else {
                 pinsInWheel.push(hitAngle);
                 pinsLeft--;
                 document.getElementById('pins-left').innerText = pinsLeft;
-                if(pinsLeft === 0) levelSuccess();
+                if(pinsLeft === 0) {
+                    let reward = 10 + (currentLvl * 2);
+                    userData.coins += reward;
+                    if(currentLvl === userData.unlocked) userData.unlocked++;
+                    localStorage.setItem('coco_data', JSON.stringify(userData));
+                    showPopup("SUCCESS!", `You earned ${reward} Coins`, true);
+                }
             }
         }
 
-        function levelSuccess() {
+        function showPopup(title, body, isWin) {
             isGameOver = true;
-            let reward = 10 + (currentLvl * 2);
-            userData.coins += reward;
-            if(currentLvl === userData.unlocked) userData.unlocked++;
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-title').style.color = isWin ? "var(--gold)" : "var(--danger)";
+            document.getElementById('msg-body').innerText = body;
             
-            localStorage.setItem('coco_user', JSON.stringify(userData)); // Save data
-
-            document.getElementById('res-reward').innerText = reward;
-            document.getElementById('next-lvl-btn').onclick = () => initPinGame(currentLvl + 1);
-            navTo('scr-result');
+            let btnHtml = `<button class="btn" onclick="navTo('scr-map')">BACK TO MAP</button>`;
+            if(isWin) btnHtml += `<button class="btn" style="background:var(--gold); color:black;" onclick="initGame(${currentLvl+1})">NEXT LEVEL</button>`;
+            else btnHtml += `<button class="btn" onclick="initGame(${currentLvl})">TRY AGAIN</button>`;
+            
+            document.getElementById('msg-btns').innerHTML = btnHtml;
+            navTo('scr-msg');
         }
 
-        // Auto-login if data exists
-        window.onload = () => { if(localStorage.getItem('coco_user')) initHub(); };
+        function varColor(name) { return getComputedStyle(document.documentElement).getPropertyValue(name); }
+
+        window.onload = loadUserData;
     </script>
 </body>
 </html>
