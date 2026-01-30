@@ -121,7 +121,113 @@
                 }
                 grid.appendChild(node);
             }
+        }   // --- PIN GAME VARIABLES ---
+let canvas, ctx;
+let angle = 0;
+let pinsInWheel = []; // රවුමේ වැදී ඇති පින්
+let pinsLeft = 5;
+let isGameOver = false;
+
+function startPinGame(level) {
+    navTo('scr-game'); // ගේම් ස්ක්‍රීන් එකට යන්න
+    canvas = document.getElementById('pinCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // මූලික දත්ත සකසමු
+    pinsInWheel = [];
+    pinsLeft = 5; 
+    isGameOver = false;
+    currentLvl = level;
+    
+    animate();
+}
+
+function animate() {
+    if (isGameOver || document.getElementById('scr-game').classList.contains('active') === false) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 1. කැරකෙන මැද රවුම ඇඳීම
+    ctx.save();
+    ctx.translate(canvas.width / 2, 150);
+    ctx.rotate(angle);
+    
+    // ලොකු රවුම
+    ctx.beginPath();
+    ctx.arc(0, 0, 50, 0, Math.PI * 2);
+    ctx.fillStyle = "#f1c40f";
+    ctx.fill();
+    ctx.fillStyle = "black";
+    ctx.fillText(currentLvl, -5, 5); // ලෙවල් එක මැද පෙන්වයි
+
+    // රවුමට වැදී ඇති පින් ඇඳීම
+    pinsInWheel.forEach(pAngle => {
+        ctx.save();
+        ctx.rotate(pAngle);
+        ctx.beginPath();
+        ctx.moveTo(0, 50);
+        ctx.lineTo(0, 120);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.arc(0, 120, 8, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.restore();
+    });
+    ctx.restore();
+
+    // 2. විදීමට සූදානම් පින් එක ඇඳීම
+    if (pinsLeft > 0) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 350);
+        ctx.lineTo(canvas.width / 2, 300);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, 350, 8, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // වේගය ලෙවල් අනුව වැඩි වේ
+    angle += 0.02 + (currentLvl * 0.002);
+    requestAnimationFrame(animate);
+}
+
+function shootPin() {
+    if (isGameOver || pinsLeft <= 0) return;
+
+    // පින් එකක් රවුමට එකතු කිරීම (දැනට තියෙන angle එකට සාපේක්ෂව)
+    let hitAngle = -angle; 
+    
+    // 3. Collision Detection (එකක් උඩ එකක් වදිනවාද බැලීම)
+    let collision = pinsInWheel.some(pAngle => {
+        let diff = Math.abs(pAngle - hitAngle) % (Math.PI * 2);
+        return diff < 0.2 || diff > (Math.PI * 2 - 0.2);
+    });
+
+    if (collision) {
+        isGameOver = true;
+        alert("පරාදයි! පින් එකක් තව එකක වැදුණා.");
+        showPage('scr-map');
+    } else {
+        pinsInWheel.push(hitAngle);
+        pinsLeft--;
+        document.getElementById('pins-left').innerText = pinsLeft;
+
+        // 4. Level Win Logic
+        if (pinsLeft === 0) {
+            setTimeout(() => {
+                let reward = 10 + (currentLvl * 2);
+                stats.coins += reward;
+                if (currentLvl === stats.unlockedLevel) stats.unlockedLevel++;
+                alert("ලෙවල් එක ඉවරයි! කොයින් ලැබුණා: " + reward);
+                showPage('scr-map');
+            }, 200);
         }
-    </script>
+    }
+}
+ </script>       
 </body>
 </html>
