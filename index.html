@@ -3,72 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coco Hub - Fixed</title>
+    <title>Coco Hub - Coconut Edition</title>
     <style>
-        :root { --bg: #0b0e14; --accent: #38bdf8; --gold: #f1c40f; --danger: #ef4444; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: manipulation; }
+        :root { --bg: #05070a; --accent: #38bdf8; --gold: #f1c40f; --danger: #ef4444; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: manipulation; display: flex; align-items: center; justify-content: center; height: 100vh; }
 
-        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; position: absolute; }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; transition: 0.5s; background: radial-gradient(circle at center, #111827 0%, #05070a 100%); }
         .active { display: flex !important; }
 
-        .top-bar { position: fixed; top: 0; width: 100%; height: 70px; background: rgba(0,0,0,0.9); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); z-index: 100; }
-        .life-tag { color: #ff4757; font-weight: bold; font-size: 18px; }
+        /* Modern UI Elements */
+        .top-bar { position: fixed; top: 0; width: 100%; height: 75px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); backdrop-filter: blur(10px); z-index: 100; }
+        .stat-box { text-align: center; }
+        .label { font-size: 10px; color: var(--accent); text-transform: uppercase; }
 
-        .btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; background: var(--accent); color: white; transition: 0.3s; margin: 5px; font-size: 16px; }
-        input { padding: 15px; border-radius: 12px; border: 1px solid #334155; background: #1e293b; color: white; width: 80%; max-width: 300px; margin-bottom: 15px; }
+        .btn { padding: 14px 30px; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; background: linear-gradient(135deg, var(--accent), #1d4ed8); color: white; transition: 0.2s; box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); font-size: 16px; margin: 10px; }
+        .btn:active { transform: scale(0.95); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #b45309); color: #000; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4); }
 
-        .map-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 20px; overflow-y: auto; max-height: 60vh; background: rgba(255,255,255,0.05); border-radius: 20px; }
-        .lvl-box { width: 50px; height: 50px; background: #334155; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.4; }
-        .unlocked { background: var(--accent); opacity: 1; cursor: pointer; box-shadow: 0 0 15px var(--accent); }
+        input { padding: 16px; border-radius: 12px; border: 1px solid #334155; background: #111827; color: white; width: 80%; max-width: 320px; margin-bottom: 15px; text-align: center; }
 
-        canvas { background: transparent; margin-top: 50px; }
-        .popup { background: rgba(15, 23, 42, 0.98); padding: 30px; border-radius: 30px; border: 2px solid var(--gold); text-align: center; width: 80%; max-width: 350px; }
+        /* Level Map */
+        .map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 20px; overflow-y: auto; max-height: 55vh; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2); }
+        .lvl { width: 50px; height: 50px; background: #1e293b; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.3; }
+        .unlocked { background: var(--accent); opacity: 1; cursor: pointer; box-shadow: 0 0 15px var(--accent); color: #000; }
+
+        /* Wallet Panel */
+        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 30px; border: 1px solid var(--accent); width: 85%; max-width: 360px; text-align: center; backdrop-filter: blur(10px); }
+
+        canvas { filter: drop-shadow(0 0 20px rgba(0,0,0,0.5)); max-width: 100%; }
+        .popup { background: #0f172a; padding: 30px; border-radius: 30px; border: 2px solid var(--gold); text-align: center; width: 80%; max-width: 320px; box-shadow: 0 0 50px rgba(0,0,0,1); z-index: 200; }
     </style>
 </head>
 <body>
 
     <div id="scr-login" class="screen active">
-        <h1 style="color:var(--accent)">COCO HUB</h1>
+        <h1 style="font-size: 3rem; margin: 0; color: var(--accent); text-shadow: 0 0 20px var(--accent);">COCO HUB</h1>
+        <p style="color: #94a3b8; margin-bottom: 30px;">Premium Mining & Gaming</p>
         <input type="text" id="reg-name" placeholder="Full Name">
         <input type="email" id="reg-email" placeholder="Email Address">
         <input type="text" id="reg-tele" placeholder="Telegram @username">
-        <button class="btn" onclick="registerUser()">LOGIN ONLINE</button>
+        <button class="btn" onclick="registerUser()">START EARNING</button>
     </div>
 
     <div id="scr-hub" class="screen">
         <div class="top-bar">
-            <span>💰 <b id="h-coins">0</b></span>
-            <span class="life-tag">❤️ <b id="h-life">5</b></span>
-            <button class="btn" style="background:var(--gold); color:black;" onclick="alert('Wallet Coming Soon!')">Wallet</button>
+            <div class="stat-box"><div class="label">COCO COINS</div>💰 <b id="h-coins">0</b></div>
+            <div class="stat-box"><div class="label">ENERGY</div>❤️ <b id="h-life">5</b></div>
+            <button class="btn btn-gold" style="padding: 8px 15px;" onclick="navTo('scr-wallet')">CASH OUT</button>
         </div>
-        <h2 style="margin-top: 80px;">CHOOSE GAME</h2>
-        <div class="btn" style="padding:40px; width:200px;" onclick="navTo('scr-map')">🎯 PIN CHALLENGE</div>
-        <div class="btn" style="padding:40px; width:200px; background:#444;">🏃 COCO RUNNER</div>
+        <div class="btn" style="padding: 60px 40px; width: 220px; border-radius: 30px;" onclick="navTo('scr-map')">
+            <span style="font-size: 40px;">🥥</span><br>COCO PIN
+        </div>
+        <div class="btn" style="padding: 40px; width: 220px; border-radius: 30px; background: #1e293b; color: #444; cursor: default;">
+            RUNNER (SOON)
+        </div>
     </div>
 
     <div id="scr-map" class="screen">
         <div class="top-bar">
-            <button class="btn" onclick="navTo('scr-hub')">Home</button>
-            <span style="font-weight:bold;">LEVELS</span>
-            <span class="life-tag">❤️ <b id="m-life">5</b></span>
+            <button class="btn" style="padding: 8px 15px;" onclick="navTo('scr-hub')">BACK</button>
+            <h3 style="color: var(--accent);">LEVEL MISSIONS</h3>
         </div>
-        <div class="map-container" id="map-grid"></div>
+        <div class="map-grid" id="map-grid"></div>
     </div>
 
     <div id="scr-game" class="screen" onclick="shootPin()">
         <div class="top-bar">
-            <span>LVL: <b id="g-lvl">1</b></span>
-            <span class="life-tag">❤️ <b id="g-life">5</b></span>
-            <span>PINS: <b id="pins-left">5</b></span>
+            <div class="stat-box"><div class="label">LEVEL</div><b id="g-lvl">1</b></div>
+            <div class="stat-box"><div class="label">KNIVES</div>🔪 <b id="pins-left">5</b></div>
+            <button class="btn" style="background: var(--danger); padding: 8px 15px;" onclick="navTo('scr-map')">QUIT</button>
         </div>
-        <canvas id="pinCanvas" width="360" height="450"></canvas>
+        <canvas id="pinCanvas" width="360" height="480"></canvas>
     </div>
 
-    <div id="scr-msg" class="screen" style="background: rgba(0,0,0,0.9);">
+    <div id="scr-wallet" class="screen">
+        <div class="panel">
+            <h2 style="color: var(--gold);">CASH OUT</h2>
+            <input type="text" placeholder="Your Wallet Address (SOL/BEP20)">
+            <p style="color: #94a3b8; font-size: 13px;">Min Withdrawal: 5,000 COCO</p>
+            <p style="color: var(--danger); font-weight: bold;">STATUS: COMING SOON</p>
+            <button class="btn" style="width: 100%; background: #334155;">WITHDRAW</button>
+        </div>
+        <button class="btn" style="background: transparent; border: 1px solid var(--accent); margin-top: 20px;" onclick="navTo('scr-hub')">BACK</button>
+    </div>
+
+    <div id="scr-msg" class="screen" style="background: rgba(0,0,0,0.8); z-index: 1000;">
         <div class="popup">
-            <h1 id="msg-title">SUCCESS!</h1>
-            <p id="msg-body">You earned 10 Coins</p>
-            <div id="msg-btns" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <h2 id="msg-title">SUCCESS</h2>
+            <p id="msg-body"></p>
+            <div id="msg-btns" style="display: flex; flex-direction: column;"></div>
         </div>
     </div>
 
@@ -76,32 +99,31 @@
         let userData = { name: "", email: "", tele: "", coins: 0, life: 5, unlocked: 1 };
         let canvas, ctx, angle = 0, pinsInWheel = [], pinsLeft = 5, isGameOver = false, currentLvl = 1;
 
+        // Sound Engine
+        const snd = (freq, type, dur) => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = type; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        };
+
         function registerUser() {
-            const n = document.getElementById('reg-name').value;
-            const e = document.getElementById('reg-email').value;
-            const t = document.getElementById('reg-tele').value;
-            if(n && e && t) {
-                userData.name = n; userData.email = e; userData.tele = t;
-                saveData(); loadUserData();
-            } else { alert("Please fill all details!"); }
+            const n = document.getElementById('reg-name').value, e = document.getElementById('reg-email').value, t = document.getElementById('reg-tele').value;
+            if(n && e && t) { userData.name=n; userData.email=e; userData.tele=t; save(); load(); } else alert("Enter all details!");
         }
 
-        function saveData() { localStorage.setItem('coco_v2', JSON.stringify(userData)); }
-
-        function loadUserData() {
-            const saved = localStorage.getItem('coco_v2');
-            if(saved) {
-                userData = JSON.parse(saved);
-                updateUI();
-                navTo('scr-hub');
-            }
+        function save() { localStorage.setItem('coco_pro_v3', JSON.stringify(userData)); }
+        function load() {
+            const s = localStorage.getItem('coco_pro_v3');
+            if(s) { userData = JSON.parse(s); updateUI(); navTo('scr-hub'); }
         }
 
         function updateUI() {
             document.getElementById('h-coins').innerText = userData.coins;
             document.getElementById('h-life').innerText = userData.life;
-            document.getElementById('m-life').innerText = userData.life;
-            document.getElementById('g-life').innerText = userData.life;
         }
 
         function navTo(id) {
@@ -112,27 +134,22 @@
         }
 
         function renderMap() {
-            const grid = document.getElementById('map-grid');
-            grid.innerHTML = "";
+            const grid = document.getElementById('map-grid'); grid.innerHTML = "";
             for(let i=1; i<=100; i++) {
-                const node = document.createElement('div');
-                node.className = `lvl-box ${i <= userData.unlocked ? 'unlocked' : ''}`;
-                node.innerText = i;
-                if(i <= userData.unlocked) node.onclick = () => initGame(i);
-                grid.appendChild(node);
+                const n = document.createElement('div');
+                n.className = `lvl ${i <= userData.unlocked ? 'unlocked' : ''}`;
+                n.innerText = i; if(i <= userData.unlocked) n.onclick = () => initGame(i);
+                grid.appendChild(n);
             }
         }
 
         function initGame(lvl) {
-            if(userData.life <= 0) { alert("No lives left! Please wait."); return; }
-            currentLvl = lvl;
-            pinsLeft = 5 + Math.floor(lvl / 3);
-            pinsInWheel = [];
-            isGameOver = false;
-            angle = 0;
+            if(userData.life <= 0) return alert("No Energy! Wait for refill.");
+            currentLvl = lvl; 
+            pinsLeft = 5 + ((lvl - 1) * 2); // Pins increase by 2 per level
+            pinsInWheel = []; isGameOver = false; angle = 0;
             navTo('scr-game');
-            canvas = document.getElementById('pinCanvas');
-            ctx = canvas.getContext('2d');
+            canvas = document.getElementById('pinCanvas'); ctx = canvas.getContext('2d');
             requestAnimationFrame(animate);
         }
 
@@ -140,35 +157,38 @@
             if(isGameOver || !document.getElementById('scr-game').classList.contains('active')) return;
             ctx.clearRect(0,0,canvas.width, canvas.height);
 
-            let wheelR = 50 + (currentLvl * 0.5); 
-            let pinLen = 100 - (currentLvl * 0.3);
-
+            let r = 60 + (currentLvl * 0.3); // Coconut gets slightly bigger
+            
             ctx.save();
-            ctx.translate(canvas.width/2, 180);
+            ctx.translate(canvas.width/2, 200);
             ctx.rotate(angle);
             
-            // Wood Wheel
-            ctx.beginPath(); ctx.arc(0,0, wheelR, 0, Math.PI*2);
-            ctx.fillStyle = "#8b4513"; ctx.fill();
-            ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 5; ctx.stroke();
-            ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.fillText(currentLvl, -10, 10);
+            // Draw Coconut 🥥
+            ctx.beginPath(); ctx.arc(0,0, r, 0, Math.PI*2);
+            ctx.fillStyle = "#452610"; ctx.fill(); // Outer shell
+            ctx.strokeStyle = "#2d180a"; ctx.lineWidth = 4; ctx.stroke();
+            
+            // Coconut Holes (The 3 dots)
+            ctx.fillStyle = "#2d180a";
+            [-15, 15, 0].forEach((x, i) => {
+                ctx.beginPath(); ctx.arc(x, i==2 ? -20 : -10, 8, 0, Math.PI*2); ctx.fill();
+            });
 
-            // Pins In Wheel
-            pinsInWheel.forEach(pAngle => {
-                ctx.save(); ctx.rotate(pAngle);
-                ctx.beginPath(); ctx.moveTo(0, wheelR); ctx.lineTo(0, wheelR + pinLen);
-                ctx.strokeStyle = "white"; ctx.lineWidth = 3; ctx.stroke();
-                ctx.beginPath(); ctx.arc(0, wheelR + pinLen, 6, 0, Math.PI*2);
-                ctx.fillStyle = "white"; ctx.fill();
+            // Draw Knives In Coconut 🔪
+            pinsInWheel.forEach(p => {
+                ctx.save(); ctx.rotate(p);
+                // Knife Blade
+                ctx.fillStyle = "#bdc3c7"; ctx.fillRect(-2, r, 4, 40);
+                // Knife Handle
+                ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-4, r+40, 8, 15);
                 ctx.restore();
             });
             ctx.restore();
 
-            // Bottom Pin
+            // Next Knife at Bottom
             if(pinsLeft > 0) {
-                ctx.beginPath(); ctx.moveTo(canvas.width/2, 420); ctx.lineTo(canvas.width/2, 360);
-                ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 4; ctx.stroke();
-                ctx.beginPath(); ctx.arc(canvas.width/2, 420, 8, 0, Math.PI*2); ctx.fillStyle = "#38bdf8"; ctx.fill();
+                ctx.fillStyle = "#bdc3c7"; ctx.fillRect(canvas.width/2 - 2, 400, 4, 40);
+                ctx.fillStyle = "#7f8c8d"; ctx.fillRect(canvas.width/2 - 4, 440, 8, 15);
             }
 
             angle += 0.02 + (currentLvl * 0.001);
@@ -178,40 +198,36 @@
 
         function shootPin() {
             if(isGameOver || pinsLeft <= 0) return;
-            let hitA = -angle;
-            let collision = pinsInWheel.some(p => Math.abs(p - hitA) % (Math.PI*2) < 0.18);
-
-            if(collision) {
-                userData.life--; saveData(); updateUI();
-                showPopup("CRASHED!", "You lost a life!", false);
+            snd(440, 'sine', 0.05); // Shoot sound
+            let hit = -angle;
+            if(pinsInWheel.some(p => Math.abs(p - hit) % (Math.PI*2) < 0.15)) {
+                isGameOver = true; userData.life--; save(); updateUI();
+                snd(100, 'sawtooth', 0.3); // Lose sound
+                showMsg("CRASHED!", "You hit another knife!", false);
             } else {
-                pinsInWheel.push(hitA);
-                pinsLeft--;
+                pinsInWheel.push(hit); pinsLeft--;
+                snd(880, 'square', 0.03); // Hit sound
                 if(pinsLeft === 0) {
-                    let reward = 10 + (currentLvl * 2);
-                    userData.coins += reward;
-                    if(currentLvl === userData.unlocked) userData.unlocked++;
-                    saveData(); updateUI();
-                    showPopup("SUCCESS!", `Earned ${reward} Coins`, true);
+                    let rew = 2 + Math.floor(currentLvl/10); // Low reward logic
+                    userData.coins += rew; if(currentLvl == userData.unlocked) userData.unlocked++;
+                    save(); updateUI();
+                    showMsg("SUCCESS!", `Mission Clear! Earned ${rew} COCO`, true);
                 }
             }
         }
 
-        function showPopup(title, body, isWin) {
-            isGameOver = true;
-            document.getElementById('msg-title').innerText = title;
-            document.getElementById('msg-title').style.color = isWin ? "var(--gold)" : "var(--danger)";
-            document.getElementById('msg-body').innerText = body;
-            
-            let btns = `<button class="btn" onclick="navTo('scr-map')">MENU</button>`;
-            if(isWin) btns += `<button class="btn" style="background:var(--gold);color:black;" onclick="initGame(${currentLvl+1})">NEXT</button>`;
+        function showMsg(t, b, win) {
+            document.getElementById('msg-title').innerText = t;
+            document.getElementById('msg-title').style.color = win ? "var(--gold)" : "var(--danger)";
+            document.getElementById('msg-body').innerText = b;
+            let btns = `<button class="btn" onclick="navTo('scr-map')">LEVELS</button>`;
+            if(win) btns += `<button class="btn btn-gold" onclick="initGame(${currentLvl+1})">NEXT LEVEL</button>`;
             else if(userData.life > 0) btns += `<button class="btn" onclick="initGame(${currentLvl})">RETRY</button>`;
-            
             document.getElementById('msg-btns').innerHTML = btns;
             navTo('scr-msg');
         }
 
-        window.onload = loadUserData;
+        window.onload = load;
     </script>
 </body>
 </html>
