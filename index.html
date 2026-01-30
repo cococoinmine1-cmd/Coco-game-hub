@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coco Game Hub</title>
+    <style>
+        :root { --primary: #3498db; --secondary: #e67e22; --dark: #1a1a1a; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; overflow: hidden; }
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; position: absolute; }
+        .active { display: flex; }
+        
+        /* UI Elements */
+        .top-bar { position: absolute; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .btn { padding: 15px 30px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 10px; transition: 0.3s; }
+        .login-btn { background: var(--primary); color: white; }
+        .game-card { width: 150px; height: 150px; background: #333; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; }
+        .game-card:hover { border-color: var(--primary); }
+        
+        /* Level Map */
+        #level-map { overflow-y: auto; padding-top: 80px; }
+        .level-node { width: 60px; height: 60px; background: #444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px; position: relative; cursor: pointer; }
+        .unlocked { background: #2ecc71; }
+        .locked { opacity: 0.5; cursor: not-allowed; }
+
+        canvas { background: #2c3e50; max-width: 100%; }
+        #wallet-popup { background: #222; padding: 20px; border-radius: 15px; text-align: center; border: 2px solid gold; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-login" class="screen active">
+        <h1>COCO HUB LOGIN</h1>
+        <input type="text" id="user-name" placeholder="Username" style="padding:10px; border-radius:5px;">
+        <button class="btn login-btn" onclick="handleLogin()">LOGIN ONLINE</button>
+    </div>
+
+    <div id="screen-hub" class="screen">
+        <div class="top-bar">
+            <span>Coins: <b id="hub-coins">0</b></span>
+            <button onclick="showScreen('screen-settings')">⚙️</button>
+            <button onclick="window.open('https://yourweb.com')">🌐 Web</button>
+        </div>
+        <div style="display:flex;">
+            <div class="game-card" onclick="startPinGame()">
+                <div style="font-size:40px;">🎯</div>
+                <p>Pin Challenge</p>
+            </div>
+            <div class="game-card" onclick="startRunnerGame()">
+                <div style="font-size:40px;">🏃</div>
+                <p>Coco Runner</p>
+            </div>
+        </div>
+        <button class="btn" style="background:gold;" onclick="showWallet()">My Wallet</button>
+    </div>
+
+    <div id="screen-levels" class="screen">
+        <button class="btn" onclick="showScreen('screen-hub')">Back</button>
+        <div id="map-container"></div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="top-bar">
+            <span id="game-lvl-display">Lvl: 1</span>
+            <span>💰 <b id="game-coins">0</b></span>
+            <button onclick="pauseGame()">HOLD</button>
+            <button onclick="showWallet()">Wallet</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="controls" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="screen-wallet" class="screen">
+        <div id="wallet-popup">
+            <h2>Coco Wallet</h2>
+            <p>Min. Withdrawal: 1000 Coins</p>
+            <input type="text" placeholder="Wallet Address" disabled>
+            <button class="btn" style="background:#555;">COMING SOON</button>
+            <button class="btn" onclick="showScreen('screen-hub')">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE ---
+        let userData = {
+            name: "",
+            coins: 0,
+            level: 1,
+            isOnline: false
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameActive = false;
+        let currentGame = "";
+
+        // --- CORE LOGIC ---
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function handleLogin() {
+            const name = document.getElementById('user-name').value;
+            if(name) {
+                userData.name = name;
+                userData.isOnline = true; // ඔන්ලයින් පමණක් කොයින්
+                showScreen('screen-hub');
+                generateLevelMap();
+            } else { alert("Please enter username!"); }
+        }
+
+        function generateLevelMap() {
+            const container = document.getElementById('map-container');
+            container.innerHTML = "<h2>Select Level</h2>";
+            for(let i=1; i<=100; i++) {
+                let div = document.createElement('div');
+                div.className = `level-node ${i <= userData.level ? 'unlocked' : 'locked'}`;
+                div.innerText = i;
+                if(i <= userData.level) div.onclick = () => startGame(i);
+                container.appendChild(div);
+            }
+        }
+
+        function showWallet() {
+            document.getElementById('coin-balance')?.innerText = userData.coins;
+            showScreen('screen-wallet');
+        }
+
+        // --- PIN CHALLENGE LOGIC ---
+        let angle = 0;
+        let pins = [];
+        function startPinGame() {
+            currentGame = "pin";
+            showScreen('screen-game');
+            initPinLevel();
+        }
+
+        function initPinLevel() {
+            pins = [];
+            gameActive = true;
+            loop();
+        }
+
+        function loop() {
+            if(!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Rotating Wheel
+            ctx.save();
+            ctx.translate(canvas.width/2, 200);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.arc(0, 0, 60, 0, Math.PI*2);
+            ctx.fillStyle = "orange";
+            ctx.fill();
+            ctx.restore();
+
+            angle += 0.02 + (userData.level * 0.005);
+            requestAnimationFrame(loop);
+        }
+
+        // --- ECONOMY & REWARDS ---
+        function onLevelComplete() {
+            if(!userData.isOnline) return; // Offline No Coins
+            
+            let reward = 10 + (userData.level * 2);
+            userData.coins += reward;
+            userData.level++;
+            
+            document.getElementById('hub-coins').innerText = userData.coins;
+            document.getElementById('game-coins').innerText = userData.coins;
+            
+            alert(`Level Up! Reward: ${reward} Coins`);
+            showAds();
+            generateLevelMap();
+            showScreen('screen-levels');
+        }
+
+        function showAds() {
+            console.log("Ad Playing...");
+            // Integrate AdMob/AdSense here
+        }
+
+        function pauseGame() {
+            gameActive = !gameActive;
+            if(gameActive) loop();
+        }
+
+        // --- LIFE SYSTEM ---
+        function onGameOver() {
+            let retry = confirm("Game Over! Watch an ad for 2 extra lives?");
+            if(retry) {
+                showAds();
+                // Grant lives logic
+            }
+        }
+
+    </script>
+</body>
+</html>
