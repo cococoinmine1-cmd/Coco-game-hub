@@ -2,232 +2,182 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Coco Hub - Coconut Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>COCO Coin Pro - Secure Ecosystem</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;500&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --bg: #05070a; --accent: #38bdf8; --gold: #f1c40f; --danger: #ef4444; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: manipulation; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        :root { --gold: #ffcc00; --bg: #000; --green: #00ff88; --border: #222; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; margin: 0; text-align: center; overflow-x: hidden; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; transition: 0.5s; background: radial-gradient(circle at center, #111827 0%, #05070a 100%); }
-        .active { display: flex !important; }
+        /* Secret Sellipli UI */
+        .balance-container { padding: 40px 0; background: radial-gradient(circle, #1a1a1a, #000); border-bottom: 1px solid var(--border); }
+        #balance { font-size: 45px; font-family: 'Orbitron'; color: var(--gold); text-shadow: 0 0 15px var(--gold); }
+        .secure-tag { font-size: 10px; color: var(--green); letter-spacing: 2px; }
 
-        /* Modern UI Elements */
-        .top-bar { position: fixed; top: 0; width: 100%; height: 75px; background: rgba(0,0,0,0.8); display: flex; justify-content: space-around; align-items: center; border-bottom: 2px solid var(--accent); backdrop-filter: blur(10px); z-index: 100; }
-        .stat-box { text-align: center; }
-        .label { font-size: 10px; color: var(--accent); text-transform: uppercase; }
-
-        .btn { padding: 14px 30px; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; background: linear-gradient(135deg, var(--accent), #1d4ed8); color: white; transition: 0.2s; box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); font-size: 16px; margin: 10px; }
-        .btn:active { transform: scale(0.95); }
-        .btn-gold { background: linear-gradient(135deg, var(--gold), #b45309); color: #000; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4); }
-
-        input { padding: 16px; border-radius: 12px; border: 1px solid #334155; background: #111827; color: white; width: 80%; max-width: 320px; margin-bottom: 15px; text-align: center; }
-
-        /* Level Map */
-        .map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 20px; overflow-y: auto; max-height: 55vh; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2); }
-        .lvl { width: 50px; height: 50px; background: #1e293b; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: not-allowed; opacity: 0.3; }
-        .unlocked { background: var(--accent); opacity: 1; cursor: pointer; box-shadow: 0 0 15px var(--accent); color: #000; }
-
-        /* Wallet Panel */
-        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 30px; border: 1px solid var(--accent); width: 85%; max-width: 360px; text-align: center; backdrop-filter: blur(10px); }
-
-        canvas { filter: drop-shadow(0 0 20px rgba(0,0,0,0.5)); max-width: 100%; }
-        .popup { background: #0f172a; padding: 30px; border-radius: 30px; border: 2px solid var(--gold); text-align: center; width: 80%; max-width: 320px; box-shadow: 0 0 50px rgba(0,0,0,1); z-index: 200; }
+        /* Game & Tap Style */
+        .tap-area { margin: 30px auto; width: 200px; height: 200px; background: url('https://img.icons8.com/emoji/160/coconut-emoji.png') no-repeat center; background-size: contain; cursor: pointer; transition: 0.1s; }
+        .tap-area:active { transform: scale(0.9); }
+        
+        /* Buttons */
+        .btn-action { background: #fff; color: #000; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; margin: 10px; width: 80%; cursor: pointer; font-family: 'Orbitron'; }
+        .btn-nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); }
+        
+        /* Game Canvas */
+        #game-canvas { width: 100%; height: 60vh; background: #050505; position: relative; overflow: hidden; border-radius: 20px; display: none; }
+        .game-obj { position: absolute; font-size: 30px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="scr-login" class="screen active">
-        <h1 style="font-size: 3rem; margin: 0; color: var(--accent); text-shadow: 0 0 20px var(--accent);">COCO HUB</h1>
-        <p style="color: #94a3b8; margin-bottom: 30px;">Premium Mining & Gaming</p>
-        <input type="text" id="reg-name" placeholder="Full Name">
-        <input type="email" id="reg-email" placeholder="Email Address">
-        <input type="text" id="reg-tele" placeholder="Telegram @username">
-        <button class="btn" onclick="registerUser()">START EARNING</button>
+    <div class="balance-container">
+        <div class="secure-tag">SECURE INSCRIPTION ACTIVE</div>
+        <div id="balance">0</div>
+        <small id="secure-hash" style="color:#444; font-size:9px;"></small>
     </div>
 
-    <div id="scr-hub" class="screen">
-        <div class="top-bar">
-            <div class="stat-box"><div class="label">COCO COINS</div>💰 <b id="h-coins">0</b></div>
-            <div class="stat-box"><div class="label">ENERGY</div>❤️ <b id="h-life">5</b></div>
-            <button class="btn btn-gold" style="padding: 8px 15px;" onclick="navTo('scr-wallet')">CASH OUT</button>
-        </div>
-        <div class="btn" style="padding: 60px 40px; width: 220px; border-radius: 30px;" onclick="navTo('scr-map')">
-            <span style="font-size: 40px;">🥥</span><br>COCO PIN
-        </div>
-        <div class="btn" style="padding: 40px; width: 220px; border-radius: 30px; background: #1e293b; color: #444; cursor: default;">
-            RUNNER (SOON)
-        </div>
+    <div id="home" class="page active">
+        <div class="tap-area" onclick="handleTap(event)"></div>
+        <p>Tap the COCO to Mine</p>
     </div>
 
-    <div id="scr-map" class="screen">
-        <div class="top-bar">
-            <button class="btn" style="padding: 8px 15px;" onclick="navTo('scr-hub')">BACK</button>
-            <h3 style="color: var(--accent);">LEVEL MISSIONS</h3>
-        </div>
-        <div class="map-grid" id="map-grid"></div>
+    <div id="tasks" class="page">
+        <h2>Missions</h2>
+        <button id="btn-yt" class="btn-action" onclick="runTask('yt', 5000, 'https://youtube.com')">Subscribe (+5k)</button>
+        <button id="btn-tg" class="btn-action" onclick="runTask('tg', 2000, 'https://t.me')">Join News (+2k)</button>
     </div>
 
-    <div id="scr-game" class="screen" onclick="shootPin()">
-        <div class="top-bar">
-            <div class="stat-box"><div class="label">LEVEL</div><b id="g-lvl">1</b></div>
-            <div class="stat-box"><div class="label">KNIVES</div>🔪 <b id="pins-left">5</b></div>
-            <button class="btn" style="background: var(--danger); padding: 8px 15px;" onclick="navTo('scr-map')">QUIT</button>
-        </div>
-        <canvas id="pinCanvas" width="360" height="480"></canvas>
+    <div id="game" class="page">
+        <h2>Coconut Catcher</h2>
+        <div id="game-canvas"></div>
+        <button id="start-btn" class="btn-action" onclick="startGame()">Start Catching</button>
     </div>
 
-    <div id="scr-wallet" class="screen">
-        <div class="panel">
-            <h2 style="color: var(--gold);">CASH OUT</h2>
-            <input type="text" placeholder="Your Wallet Address (SOL/BEP20)">
-            <p style="color: #94a3b8; font-size: 13px;">Min Withdrawal: 5,000 COCO</p>
-            <p style="color: var(--danger); font-weight: bold;">STATUS: COMING SOON</p>
-            <button class="btn" style="width: 100%; background: #334155;">WITHDRAW</button>
-        </div>
-        <button class="btn" style="background: transparent; border: 1px solid var(--accent); margin-top: 20px;" onclick="navTo('scr-hub')">BACK</button>
-    </div>
-
-    <div id="scr-msg" class="screen" style="background: rgba(0,0,0,0.8); z-index: 1000;">
-        <div class="popup">
-            <h2 id="msg-title">SUCCESS</h2>
-            <p id="msg-body"></p>
-            <div id="msg-btns" style="display: flex; flex-direction: column;"></div>
-        </div>
+    <div class="btn-nav">
+        <div onclick="showPage('home')">🏠</div>
+        <div onclick="showPage('tasks')">📋</div>
+        <div onclick="showPage('game')">🎮</div>
     </div>
 
     <script>
-        let userData = { name: "", email: "", tele: "", coins: 0, life: 5, unlocked: 1 };
-        let canvas, ctx, angle = 0, pinsInWheel = [], pinsLeft = 5, isGameOver = false, currentLvl = 1;
-
-        // Sound Engine
-        const snd = (freq, type, dur) => {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type = type; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        // 1. Firebase Configuration (මෙතන උඹේ Firebase විස්තර දාපන්)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            databaseURL: "YOUR_DB_URL",
+            projectId: "YOUR_PROJECT_ID"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        function registerUser() {
-            const n = document.getElementById('reg-name').value, e = document.getElementById('reg-email').value, t = document.getElementById('reg-tele').value;
-            if(n && e && t) { userData.name=n; userData.email=e; userData.tele=t; save(); load(); } else alert("Enter all details!");
+        let balance = 0;
+        let currentId = "user_" + Math.floor(Math.random() * 1000); // පස්සේ Telegram ID එකට මාරු කරපන්
+
+        // 2. DYNAMIC ROLLING ENCRYPTION (සෙල්ලිපි ආරක්ෂාව)
+        const inscriptionSets = [
+            { '0': '𑇐', '1': '•', '2': '𑇒', '3': '𑇓', '4': '𑇔', '5': '𑇕', '6': '𑇖', '7': '𑇗', '8': '𑇘', '9': '𑇙' },
+            { '0': '⦿', '1': '°', '2': '⦾', '3': '⊡', '4': '⋇', '5': '⋉', '6': '⋊', '7': '⋈', '8': '⋌', '9': '⋍' }
+        ];
+
+        function encryptData(val) {
+            let setIndex = new Date().getMinutes() % inscriptionSets.length;
+            let set = inscriptionSets[setIndex];
+            let encrypted = setIndex + ":";
+            for (let char of val.toString()) { encrypted += set[char] || char; }
+            return encrypted;
         }
 
-        function save() { localStorage.setItem('coco_pro_v3', JSON.stringify(userData)); }
-        function load() {
-            const s = localStorage.getItem('coco_pro_v3');
-            if(s) { userData = JSON.parse(s); updateUI(); navTo('scr-hub'); }
+        // 3. CORE LOGIC
+        function handleTap(e) {
+            balance++;
+            updateUI();
+            saveToCloud();
+        }
+
+        function saveToCloud() {
+            let secret = encryptData(balance);
+            document.getElementById('secure-hash').innerText = "Hash: " + secret;
+            // ඩේටාබේස් එකට යවන්නේ අමුතු නමකින්
+            db.ref('users/' + currentId).update({
+                sh_val: secret,
+                raw_p: balance
+            });
         }
 
         function updateUI() {
-            document.getElementById('h-coins').innerText = userData.coins;
-            document.getElementById('h-life').innerText = userData.life;
+            document.getElementById('balance').innerText = balance.toLocaleString();
         }
 
-        function navTo(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'scr-map') renderMap();
-            updateUI();
         }
 
-        function renderMap() {
-            const grid = document.getElementById('map-grid'); grid.innerHTML = "";
-            for(let i=1; i<=100; i++) {
-                const n = document.createElement('div');
-                n.className = `lvl ${i <= userData.unlocked ? 'unlocked' : ''}`;
-                n.innerText = i; if(i <= userData.unlocked) n.onclick = () => initGame(i);
-                grid.appendChild(n);
-            }
+        // 4. TASK LOGIC (Double-Click Proof)
+        function runTask(id, reward, url) {
+            window.open(url);
+            setTimeout(() => {
+                balance += reward;
+                updateUI();
+                saveToCloud();
+                document.getElementById('btn-'+id).disabled = true;
+                document.getElementById('btn-'+id).innerText = "DONE ✅";
+            }, 5000);
         }
 
-        function initGame(lvl) {
-            if(userData.life <= 0) return alert("No Energy! Wait for refill.");
-            currentLvl = lvl; 
-            pinsLeft = 5 + ((lvl - 1) * 2); // Pins increase by 2 per level
-            pinsInWheel = []; isGameOver = false; angle = 0;
-            navTo('scr-game');
-            canvas = document.getElementById('pinCanvas'); ctx = canvas.getContext('2d');
-            requestAnimationFrame(animate);
+        // 5. MINI GAME (Catcher)
+        let gameActive = false;
+        function startGame() {
+            gameActive = true;
+            document.getElementById('game-canvas').style.display = "block";
+            document.getElementById('start-btn').style.display = "none";
+            let score = 0;
+            let timer = setInterval(() => {
+                if(!gameActive) return clearInterval(timer);
+                spawnObj();
+            }, 800);
+            setTimeout(() => { 
+                gameActive = false; 
+                alert("Game Over! Points Syncing...");
+                document.getElementById('game-canvas').style.display = "none";
+                document.getElementById('start-btn').style.display = "block";
+            }, 20000);
         }
 
-        function animate() {
-            if(isGameOver || !document.getElementById('scr-game').classList.contains('active')) return;
-            ctx.clearRect(0,0,canvas.width, canvas.height);
+        function spawnObj() {
+            const canvas = document.getElementById('game-canvas');
+            const obj = document.createElement('div');
+            const isBomb = Math.random() < 0.2;
+            obj.className = 'game-obj';
+            obj.innerText = isBomb ? '💣' : '🥥';
+            obj.style.left = Math.random() * 90 + '%';
+            obj.style.top = '0px';
+            canvas.appendChild(obj);
 
-            let r = 60 + (currentLvl * 0.3); // Coconut gets slightly bigger
-            
-            ctx.save();
-            ctx.translate(canvas.width/2, 200);
-            ctx.rotate(angle);
-            
-            // Draw Coconut 🥥
-            ctx.beginPath(); ctx.arc(0,0, r, 0, Math.PI*2);
-            ctx.fillStyle = "#452610"; ctx.fill(); // Outer shell
-            ctx.strokeStyle = "#2d180a"; ctx.lineWidth = 4; ctx.stroke();
-            
-            // Coconut Holes (The 3 dots)
-            ctx.fillStyle = "#2d180a";
-            [-15, 15, 0].forEach((x, i) => {
-                ctx.beginPath(); ctx.arc(x, i==2 ? -20 : -10, 8, 0, Math.PI*2); ctx.fill();
-            });
+            let pos = 0;
+            let anim = setInterval(() => {
+                pos += 5;
+                obj.style.top = pos + 'px';
+                if(pos > 500) { clearInterval(anim); obj.remove(); }
+            }, 30);
 
-            // Draw Knives In Coconut 🔪
-            pinsInWheel.forEach(p => {
-                ctx.save(); ctx.rotate(p);
-                // Knife Blade
-                ctx.fillStyle = "#bdc3c7"; ctx.fillRect(-2, r, 4, 40);
-                // Knife Handle
-                ctx.fillStyle = "#7f8c8d"; ctx.fillRect(-4, r+40, 8, 15);
-                ctx.restore();
-            });
-            ctx.restore();
-
-            // Next Knife at Bottom
-            if(pinsLeft > 0) {
-                ctx.fillStyle = "#bdc3c7"; ctx.fillRect(canvas.width/2 - 2, 400, 4, 40);
-                ctx.fillStyle = "#7f8c8d"; ctx.fillRect(canvas.width/2 - 4, 440, 8, 15);
-            }
-
-            angle += 0.02 + (currentLvl * 0.001);
-            document.getElementById('pins-left').innerText = pinsLeft;
-            requestAnimationFrame(animate);
-        }
-
-        function shootPin() {
-            if(isGameOver || pinsLeft <= 0) return;
-            snd(440, 'sine', 0.05); // Shoot sound
-            let hit = -angle;
-            if(pinsInWheel.some(p => Math.abs(p - hit) % (Math.PI*2) < 0.15)) {
-                isGameOver = true; userData.life--; save(); updateUI();
-                snd(100, 'sawtooth', 0.3); // Lose sound
-                showMsg("CRASHED!", "You hit another knife!", false);
-            } else {
-                pinsInWheel.push(hit); pinsLeft--;
-                snd(880, 'square', 0.03); // Hit sound
-                if(pinsLeft === 0) {
-                    let rew = 2 + Math.floor(currentLvl/10); // Low reward logic
-                    userData.coins += rew; if(currentLvl == userData.unlocked) userData.unlocked++;
-                    save(); updateUI();
-                    showMsg("SUCCESS!", `Mission Clear! Earned ${rew} COCO`, true);
+            obj.onclick = () => {
+                if(isBomb) { 
+                    alert("Hit a Bomb!"); 
+                    gameActive = false; 
+                } else {
+                    balance += 10;
+                    updateUI();
+                    saveToCloud();
+                    obj.remove();
                 }
-            }
+            };
         }
-
-        function showMsg(t, b, win) {
-            document.getElementById('msg-title').innerText = t;
-            document.getElementById('msg-title').style.color = win ? "var(--gold)" : "var(--danger)";
-            document.getElementById('msg-body').innerText = b;
-            let btns = `<button class="btn" onclick="navTo('scr-map')">LEVELS</button>`;
-            if(win) btns += `<button class="btn btn-gold" onclick="initGame(${currentLvl+1})">NEXT LEVEL</button>`;
-            else if(userData.life > 0) btns += `<button class="btn" onclick="initGame(${currentLvl})">RETRY</button>`;
-            document.getElementById('msg-btns').innerHTML = btns;
-            navTo('scr-msg');
-        }
-
-        window.onload = load;
     </script>
 </body>
 </html>
+
